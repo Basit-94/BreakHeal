@@ -2181,7 +2181,8 @@ def report(
     import webbrowser
     from breakheal.report import generate_html_report, serve_html_report, AuditRecord
     
-    html_path = Path(html_out)
+    target_out = html_out if isinstance(html_out, str) else "BREAKHEAL_REPORT.html"
+    html_path = Path(target_out)
     if not html_path.exists():
         records = [
             AuditRecord(
@@ -2211,11 +2212,14 @@ def report(
 
 @app.command()
 def ui(
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Automatically open dashboard in browser."),
     serve: bool = typer.Option(False, "--serve", "-s", help="Launch local HTTP server to view dashboard."),
     port: int = typer.Option(8080, "--port", "-p", help="Port for dashboard HTTP server."),
+    html_out: str = typer.Option("BREAKHEAL_REPORT.html", "--html", help="Path to output HTML report."),
 ) -> None:
     """Instant shortcut to open the BreakHeal visual HTML dashboard."""
-    report(open_browser=True, serve=serve, port=port)
+    target_out = html_out if isinstance(html_out, str) else "BREAKHEAL_REPORT.html"
+    report(open_browser=open_browser, serve=serve, port=port, html_out=target_out)
 
 
 @app.command()
