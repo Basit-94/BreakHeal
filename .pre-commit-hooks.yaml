@@ -1,0 +1,8 @@
+- id: breakheal-sentinel
+  name: BreakHeal Sentinel
+  description: Deterministic Red-to-Green pre-commit verification hook
+  entry: breakheal pre-commit
+  language: python
+  types_or: [python, java, ts, js]
+  pass_filenames: false
+  always_run: true
