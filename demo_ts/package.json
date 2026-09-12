@@ -1,0 +1,9 @@
+{
+  "name": "demo-ts",
+  "version": "1.0.0",
+  "description": "BreakHeal TypeScript/JavaScript Test Fixture",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
