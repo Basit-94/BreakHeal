@@ -35,3 +35,5 @@ tests/test_breakheal_*.py
 demo_repo/tests/
 demo_rust/tests/
 BREAKHEAL_REPORT.md
+BREAKHEAL_REPORT.html
+BENCHMARK_RESULTS.json

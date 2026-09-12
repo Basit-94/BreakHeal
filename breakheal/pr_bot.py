@@ -46,6 +46,93 @@ def generate_github_suggestion_block(
     )
 
 
+def format_github_pr_markdown_comment(
+    records: List[AuditRecord],
+    pr_number: Optional[int] = None,
+    branch_name: Optional[str] = None,
+) -> str:
+    """Generate a rich, structured GitHub PR review comment."""
+    total = len(records)
+    healed = sum(1 for r in records if r.status == "HEALED")
+    clean = sum(1 for r in records if r.status == "CLEAN")
+
+    lines = [
+        "## 🛡️ BreakHeal Autonomous Code Sentinel",
+        "",
+        f"BreakHeal scanned the pull request diff and evaluated **{total} modified function(s)** against adversarial boundary conditions.",
+        "",
+        "| Target Symbol | File | Status | Boundary Vector | Repair Verification |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+    ]
+
+    for r in records:
+        icon = "✅ **HEALED**" if r.status == "HEALED" else "🛡️ **CLEAN**"
+        file_name = Path(r.target_file).name
+        vuln = (r.vulnerability_details or "Robust boundary").replace("\n", " ")[:45]
+        proof = "Proven RED ➔ GREEN" if r.status == "HEALED" else "No flaws found"
+        lines.append(f"| `{r.symbol_name}` | `{file_name}` | {icon} | {vuln} | {proof} |")
+
+    lines.extend([
+        "",
+        "---",
+        "",
+    ])
+
+    for idx, r in enumerate(records, start=1):
+        if r.status != "HEALED":
+            continue
+        file_name = Path(r.target_file).name
+        lines.extend([
+            f"### 🔍 Finding #{idx}: `{file_name}` :: `{r.symbol_name}`",
+            "",
+            f"- **Diagnosis:** {r.vulnerability_details}",
+            "",
+            "<details>",
+            "<summary><b>View Proven Failing Test (Red Reproducer)</b></summary>",
+            "",
+            "```python",
+            r.test_code.strip(),
+            "```",
+            "",
+            "</details>",
+            "",
+            "<details open>",
+            "<summary><b>View Verified Minimal Patch (Green Pass)</b></summary>",
+            "",
+            "```text",
+            r.patch_text.strip(),
+            "```",
+            "",
+            "</details>",
+            "",
+        ])
+
+    if branch_name:
+        lines.extend([
+            f"> 💡 *Ready-to-merge repair branch:* [`{branch_name}`](https://github.com/)",
+            "",
+        ])
+
+    lines.append("*Automated software engineering verification powered by [BreakHeal](https://github.com/Basit-94/BreakHeal).*")
+    return "\n".join(lines)
+
+
+def post_github_pr_comment(
+    comment_markdown: str,
+    pr_number: int,
+    repo: Optional[str] = None,
+) -> bool:
+    """Post comment to GitHub PR using `gh pr comment` CLI if available."""
+    try:
+        cmd = ["gh", "pr", "comment", str(pr_number), "--body", comment_markdown]
+        if repo:
+            cmd.extend(["--repo", repo])
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.returncode == 0
+    except Exception:
+        return False
+
+
 def execute_pr_healing_branch(
     records: List[AuditRecord],
     base_branch: str = "main",

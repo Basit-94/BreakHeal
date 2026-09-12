@@ -64,7 +64,10 @@ flowchart TD
 | **Deterministic Local Proof** | **Yes (Exit 0 Verified)** | No (Text review only) | No (Text generation) | No (Text review only) |
 | **Synthesizes Breaking Unit Tests** | **Yes (Pytest & JUnit 5)** | No | No | No |
 | **Zero Unified-Diff Failures** | **Yes (`SEARCH/REPLACE`)** | N/A | High failure rate | High failure rate |
-| **Multi-Language Polyglot** | **Yes (Python & Java)** | Any (text only) | Any (text only) | Any (text only) |
+| **Multi-Language Polyglot** | **Yes (Python, Java, TS, Go, Rust)** | Any (text only) | Any (text only) | Any (text only) |
+| **Interactive Web Dashboard** | **Yes (`breakheal report --serve`)** | No | No | No |
+| **Empirical Polyglot Benchmark** | **Yes (`breakheal benchmark`)** | No | No | No |
+| **Cross-Module Contract Resolver** | **Yes (Local AST crawl)** | No | Limited | Limited |
 | **Regression Guard** | **Yes (Subprocess suite run)** | No | No | No |
 | **Interactive Terminal TUI** | **Yes (Rich Pipeline Cards)** | No | No | No |
 | **Interactive Demo Mode** | **Yes (`breakheal demo`)** | No | No | No |
@@ -145,6 +148,26 @@ breakheal pr --base main --auto-commit --yes
 Generate `.github/workflows/breakheal.yml` for automated CI/CD protection:
 ```bash
 breakheal init-ci
+```
+
+### 6. Interactive Visual Web Dashboard (`report`)
+Generate or host an interactive, offline-ready web dashboard with execution timelines, stats cards, and side-by-side diffs:
+```bash
+# Generate standalone HTML report
+breakheal report --html BREAKHEAL_REPORT.html
+
+# Launch local server and open dashboard in default browser
+breakheal report --serve --port 8080
+```
+
+### 7. Empirical Polyglot Benchmark Suite (`benchmark`)
+Evaluate autonomous repair against 25 standardized real-world boundary vulnerabilities across Python, Java, TypeScript, Go, and Rust:
+```bash
+# Run complete 25-case polyglot benchmark
+breakheal benchmark
+
+# Run benchmark for specific language
+breakheal benchmark --lang python
 ```
 
 ---

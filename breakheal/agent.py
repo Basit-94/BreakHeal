@@ -175,6 +175,14 @@ class GroqAgent:
         else:
             user_prompt += f"File imports:\n{imports_block}\n\n"
 
+        try:
+            from breakheal.import_graph import build_import_contract_prompt_section
+            contracts = build_import_contract_prompt_section(context.file_path)
+            if contracts:
+                user_prompt += f"\n{contracts}\n"
+        except Exception:
+            pass
+
         if feedback:
             user_prompt += (
                 f"\nPrevious attempt feedback (the previous test passed or was invalid):\n"
@@ -239,6 +247,14 @@ class GroqAgent:
             f"Adversarial failing test:\n```python\n{test_code}\n```\n\n"
             f"Pytest failure traceback / output:\n```text\n{test_output}\n```\n\n"
         )
+
+        try:
+            from breakheal.import_graph import build_import_contract_prompt_section
+            contracts = build_import_contract_prompt_section(context.file_path)
+            if contracts:
+                user_prompt += f"\n{contracts}\n"
+        except Exception:
+            pass
 
         if previous_attempts:
             user_prompt += "\n--- PREVIOUS FAILED PATCH ATTEMPTS ---\n"

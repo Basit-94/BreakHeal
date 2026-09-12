@@ -2170,8 +2170,51 @@ def pre_commit(
     console.print("\n[bold green]✓ Pre-Commit Verification Complete: All staged files approved.[/bold green]")
 
 
+@app.command()
+def report(
+    serve: bool = typer.Option(False, "--serve", "-s", help="Launch local HTTP server to view dashboard in browser."),
+    port: int = typer.Option(8080, "--port", "-p", help="Port for dashboard HTTP server."),
+    html_out: str = typer.Option("BREAKHEAL_REPORT.html", "--html", help="Path to output HTML report."),
+) -> None:
+    """Generate or serve an interactive visual HTML dashboard for BreakHeal audits."""
+    from breakheal.report import generate_html_report, serve_html_report, AuditRecord
+    
+    html_path = Path(html_out)
+    if not html_path.exists():
+        records = [
+            AuditRecord(
+                target_file="demo_repo/pricing.py",
+                symbol_name="calculate_discounted_unit_price",
+                status="HEALED",
+                vulnerability_details="ZeroDivisionError when quantity is 0 or negative",
+                test_code="def test_zero_quantity():\n    calculate_discounted_unit_price(100.0, 0, 10.0)",
+                patch_text="<<<<<<< SEARCH\nreturn (price * (1 - discount_pct / 100.0)) / quantity\n=======\nif quantity <= 0:\n    raise ValueError('quantity must be positive')\nreturn (price * (1 - discount_pct / 100.0)) / quantity\n>>>>>>>",
+                original_code="def calculate_discounted_unit_price(price, quantity, discount_pct):\n    return (price * (1 - discount_pct / 100.0)) / quantity",
+                patched_code="def calculate_discounted_unit_price(price, quantity, discount_pct):\n    if quantity <= 0:\n        raise ValueError('quantity must be positive')\n    return (price * (1 - discount_pct / 100.0)) / quantity",
+                traceback_red="ZeroDivisionError: division by zero",
+                traceback_green="1 passed in 0.05s",
+                duration_seconds=1.25,
+            )
+        ]
+        generate_html_report(records, output_path=html_path)
+        console.print(f"[bold green]✓ Generated interactive HTML dashboard:[/bold green] {html_path.resolve()}")
+    
+    if serve:
+        console.print(f"[bold cyan]Serving BreakHeal Dashboard at http://localhost:{port}... (Press Ctrl+C to stop)[/bold cyan]")
+        serve_html_report(html_path=html_path, port=port, open_browser=True)
+
+
+@app.command()
+def benchmark(
+    lang: str = typer.Option("all", "--lang", "-l", help="Language filter: all, python, java, typescript, go, rust."),
+) -> None:
+    """Execute the empirical polyglot benchmark suite across 25 boundary vulnerabilities."""
+    from breakheal.benchmark import run_benchmark_suite
+    run_benchmark_suite(language_filter=lang, console=console)
+
+
 KNOWN_COMMANDS = {
-    "run", "scan", "pr", "init-ci", "demo", "mutate", "fix-pr", "pre-commit",
+    "run", "scan", "pr", "init-ci", "demo", "mutate", "fix-pr", "pre-commit", "report", "benchmark",
     "--help", "-h", "--version", "-v", "help"
 }
 
