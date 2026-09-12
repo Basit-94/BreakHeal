@@ -2172,11 +2172,13 @@ def pre_commit(
 
 @app.command()
 def report(
-    serve: bool = typer.Option(False, "--serve", "-s", help="Launch local HTTP server to view dashboard in browser."),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Automatically open dashboard in browser."),
+    serve: bool = typer.Option(False, "--serve", "-s", help="Launch local HTTP server to view dashboard."),
     port: int = typer.Option(8080, "--port", "-p", help="Port for dashboard HTTP server."),
     html_out: str = typer.Option("BREAKHEAL_REPORT.html", "--html", help="Path to output HTML report."),
 ) -> None:
-    """Generate or serve an interactive visual HTML dashboard for BreakHeal audits."""
+    """Generate and open an interactive visual HTML dashboard for BreakHeal audits."""
+    import webbrowser
     from breakheal.report import generate_html_report, serve_html_report, AuditRecord
     
     html_path = Path(html_out)
@@ -2201,7 +2203,19 @@ def report(
     
     if serve:
         console.print(f"[bold cyan]Serving BreakHeal Dashboard at http://localhost:{port}... (Press Ctrl+C to stop)[/bold cyan]")
-        serve_html_report(html_path=html_path, port=port, open_browser=True)
+        serve_html_report(html_path=html_path, port=port, open_browser=open_browser)
+    elif open_browser:
+        console.print(f"[bold green]✓ Opening dashboard in browser:[/bold green] {html_path.name}")
+        webbrowser.open(html_path.resolve().as_uri())
+
+
+@app.command()
+def ui(
+    serve: bool = typer.Option(False, "--serve", "-s", help="Launch local HTTP server to view dashboard."),
+    port: int = typer.Option(8080, "--port", "-p", help="Port for dashboard HTTP server."),
+) -> None:
+    """Instant shortcut to open the BreakHeal visual HTML dashboard."""
+    report(open_browser=True, serve=serve, port=port)
 
 
 @app.command()
@@ -2214,7 +2228,7 @@ def benchmark(
 
 
 KNOWN_COMMANDS = {
-    "run", "scan", "pr", "init-ci", "demo", "mutate", "fix-pr", "pre-commit", "report", "benchmark",
+    "run", "scan", "pr", "init-ci", "demo", "mutate", "fix-pr", "pre-commit", "report", "ui", "benchmark",
     "--help", "-h", "--version", "-v", "help"
 }
 

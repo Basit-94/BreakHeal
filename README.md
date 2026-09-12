@@ -150,13 +150,15 @@ Generate `.github/workflows/breakheal.yml` for automated CI/CD protection:
 breakheal init-ci
 ```
 
-### 6. Interactive Visual Web Dashboard (`report`)
-Generate or host an interactive, offline-ready web dashboard with execution timelines, stats cards, and side-by-side diffs:
+### 6. Interactive Visual Web Dashboard (`report` / `ui`)
+Instantly generate and open the interactive visual audit dashboard in your browser:
 ```bash
-# Generate standalone HTML report
-breakheal report --html BREAKHEAL_REPORT.html
+# Instant open in default browser (no flags required)
+breakheal report
+# or simply:
+breakheal ui
 
-# Launch local server and open dashboard in default browser
+# Optional: host on custom port
 breakheal report --serve --port 8080
 ```
 
